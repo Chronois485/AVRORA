@@ -6,8 +6,12 @@ import sounddevice as sd
 import soundfile as sf
 import os
 import random
+import pyfirmata2
 from datetime import datetime
+import time
 
+pins = list()
+PORT = pyfirmata2.Arduino.AUTODETECT
 language = 'uk'
 last_promts = list()
 last_answers = list()
@@ -15,6 +19,19 @@ count_of_remembered_promts = 16
 your_name = "sir"
 show_promts = 0
 terraria_path = ""
+board = pyfirmata2.Arduino(PORT)
+try:
+    try:
+        file = open("setupPins.txt")
+    except:
+        pass
+
+    for line in file:
+        line = line.split(",")
+        pins.append(board.get_pin(line[0]))
+    file.close()
+except:
+    pass
 print(f"                        AVRORA                            \n"
       f"Artificial Virtual Robot Optimized for Reliable Assistance")
 with open(".\\settings.txt") as open_file:
@@ -82,14 +99,13 @@ def make_something():
                 os.startfile(terraria_path)
                 ans = gTTS(text=standart_answer, lang=language, slow=False)
             elif "відкрий vs code" in task or "открой vscode" in task:
-                os.startfile(r'C:\Users\matvii\AppData\Local\Programs\Microsoft VS Code\Code.exe')
+                os.startfile(r'"F:\MYPROGRAMS\Microsoft VS Code\Code.exe"')
                 ans = gTTS(text=standart_answer, lang=language, slow=False)
-            elif "вимкнись" in task:
+            elif task == "вимкнись":
                 run = False
                 ans = gTTS(text=f"допобачення {your_name}", lang=language, slow=False)
             elif "відкрий telegram" in task:
-                os.startfile(r'C:\Program Files\WindowsApps\TelegramMessengerLLP.TelegramDesktop_5.2.3'
-                             r'.0_x64__t4vj0pshhgkwm\Telegram.exe')
+                os.startfile(r'"C:\Users\matvii\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Telegram Desktop\Telegram.lnk"')
                 ans = gTTS(text=standart_answer, lang=language, slow=False)
             elif "музику" in task:
                 webbrowser.open_new_tab("https://soundcloud.com/matvij-kalinin/sets/playlist")
@@ -120,12 +136,20 @@ def make_something():
             elif "microsoft office" in task:
                 webbrowser.open_new_tab("https://www.office.com/?auth=1")
                 ans = gTTS(text=standart_answer, lang=language, slow=False)
+            elif "вимкни світло" in task:
+                pins[10].write(0)
+                ans = gTTS(text=standart_answer, lang=language, slow=False)
+            elif "увімкни світло" in task:
+                pins[10].write(0)
+                time.sleep(0.5)
+                pins[10].write(1)
+                ans = gTTS(text=standart_answer, lang=language, slow=False)
             elif "котра година" in task:
                 current_datetime = datetime.now()
                 ans = gTTS(
                     text=f"{your_name}, зараз {current_datetime.hour}, {current_datetime.minute}, {current_datetime.second}",
                     lang=language, slow=False)
-            else:
+            elif "питання" in task:
                 promt = (f"Ти голосовий помічник AVRORA що розшифровується як Artificial Virtual Robot Optimized for "
                          f"Reliable Assistance,"
                          f"остані запити: {last_promts}, останні відповіді: {last_answers}, використовуй історію "
@@ -147,6 +171,8 @@ def make_something():
                 ans = gTTS(text=ask_gpt(promt), lang=language, slow=False)
                 if show_promts == "1":
                     print(f"Текущий промт: {promt}")
+            else:
+                ans = gTTS(text="Не розумію", lang=language, slow=False)
             ans.save("sound.mp3")
             data, fs = sf.read("sound.mp3", dtype='float32')
             sd.play(data, fs)

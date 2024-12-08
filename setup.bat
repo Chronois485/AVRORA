@@ -1,6 +1,3 @@
-"python-installer.exe" /passive InstallAllUsers=1 PrependPath=1 Include_test=0
-python -m pip install -U pip
-python -m ensurepip --upgrade
 pip install -U Brotli
 pip install -U PyAudio
 pip install -U SpeechRecognition
