@@ -95,6 +95,9 @@ def make_something():
             elif "відкрий youtube" in task:
                 webbrowser.open_new_tab("https://www.youtube.com/")
                 ans = gTTS(text=standart_answer, lang=language, slow=False)
+            elif "відкрий твої відповіді" in task:
+                os.startfile("openAns.bat")
+                ans = gTTS(text=standart_answer, lang=language, slow=False)
             elif "відкрий terraria" in task:
                 os.startfile(terraria_path)
                 ans = gTTS(text=standart_answer, lang=language, slow=False)
@@ -169,6 +172,8 @@ def make_something():
                     last_answers.pop(0)
                     last_answers.append(ask_gpt(task))
                 ans = gTTS(text=ask_gpt(promt), lang=language, slow=False)
+                answers = open("answers.txt", "w+")
+                answers.write(task)
                 if show_promts == "1":
                     print(f"Текущий промт: {promt}")
             else:
