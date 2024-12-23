@@ -1,4 +1,5 @@
-count_of_remembered_promts = 20
-your_name = hronos
-show_promts = 0
-path_to_terraria = "C:\Users\matvii\Desktop\games\Terraria.url"
+your_name = sir
+music_link = https://www.spotify.com/ua-uk/free/
+use_light_system = False
+telegram_online = False
+telegram_path = 

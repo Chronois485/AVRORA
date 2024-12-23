@@ -13,40 +13,49 @@ import time
 pins = list()
 PORT = pyfirmata2.Arduino.AUTODETECT
 language = 'uk'
-last_promts = list()
-last_answers = list()
-count_of_remembered_promts = 16
 your_name = "sir"
-show_promts = 0
-terraria_path = ""
-board = pyfirmata2.Arduino(PORT)
-try:
-    try:
-        file = open("setupPins.txt")
-    except:
-        pass
+use_light_system = ""
+music_link = "https://www.spotify.com/ua-uk/free/"
+telegram_path = ""
+telegram_online = ""
 
-    for line in file:
-        line = line.split(",")
-        pins.append(board.get_pin(line[0]))
-    file.close()
-except:
-    pass
-print(f"                        AVRORA                            \n"
-      f"Artificial Virtual Robot Optimized for Reliable Assistance")
 with open(".\\settings.txt") as open_file:
     for line in open_file:
-        if line[:29] == "count_of_remembered_promts = ":
-            count_of_remembered_promts = int(line[29:])
-        elif line[:12] == "your_name = ":
+        if line[:12] == "your_name = ":
             your_name = line[12:]
         elif line[:14] == "show_promts = ":
             show_promts = line[14:]
-        elif line[:19] == "path_to_terraria = ":
-            terraria_path = line[19:]
+        elif line[:13] == "music_link = ":
+            music_link = line[13:]
+        elif line[:19] == "use_light_system = ":
+            use_light_system = line[19:]
+        elif line[:16] == "telegram_path = ":
+            telegram_path = line[16:]
+        elif line[:18] == "telegram_online = ":
+            telegram_online = line[18:]
+if use_light_system == "True\n":
+    board = pyfirmata2.Arduino(PORT)
+    try:
+        try:
+            file = open("setupPins.txt")
+        except:
+            print("Не знаєденно файлу з налаштуванням пінів")
+
+        for line in file:
+            line = line.split(",")
+            pins.append(board.get_pin(line[0]))
+        file.close()
+    except:
+        pass
+print(f"                        AVRORA                            \n"
+      f"Artificial Virtual Robot Optimized for Reliable Assistance")
+
+StandartAns1 = gTTS(text=f"звісно {your_name}", lang=language, slow=False).save("s1.mp3")
+StandartAns1 = gTTS(text=f"секунду {your_name}", lang=language, slow=False).save("s2.mp3")
+StandartAns1 = gTTS(text=f"зараз {your_name}", lang=language, slow=False).save("s3.mp3")
 
 print(
-    f"Поточні налаштування:\nКількість запам'ятовуємих промтів: {count_of_remembered_promts}\nДо вас звертатися: {your_name}")
+    f"\nПоточні налаштування:\n\nДо вас звертатися: {your_name}\nПосилання на музику: {music_link}\nШлях до телеграму: {telegram_path}\n\nВикористовувати телеграм в браузері: {telegram_online}\n\nВикористовувати систему світла: {use_light_system}\n")
 ans = gTTS(text=f"Вітаю, {your_name}, всі системи активні", lang=language, slow=False)
 ans.save("welcome.mp3")
 data, fs = sf.read("welcome.mp3", dtype='float32')
@@ -64,7 +73,6 @@ def command():
 
     try:
         task = r.recognize_google(audio, language="uk-in").lower()
-        print(task)
     except:
         task = command()
     return task
@@ -74,16 +82,7 @@ def make_something():
     task = command()
     global run
     run = True
-    standart_answer = ""
-    r = random.randint(0, 3)
-
-    if r == 0:
-        standart_answer = f"звісно {your_name}"
-    elif r == 1:
-        standart_answer = f"секунду {your_name}"
-    else:
-        standart_answer = f"зараз {your_name}"
-    if "аврора" in task[:6]:
+    if "аврора" in task[:6] or "aurora" in task[:6]:
         print(task)
         task = task[6:]
         if task != "" and task != " ":
@@ -91,30 +90,28 @@ def make_something():
                 task = task[6:]
                 task.replace(" ", "+")
                 webbrowser.open_new_tab(f"https://www.google.com/search?q={task}")
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
+                ans = "standart"
             elif "відкрий youtube" in task:
                 webbrowser.open_new_tab("https://www.youtube.com/")
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
-            elif "відкрий твої відповіді" in task:
-                os.startfile("openAns.bat")
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
-            elif "відкрий terraria" in task:
-                os.startfile(terraria_path)
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
-            elif "відкрий vs code" in task or "открой vscode" in task:
-                os.startfile(r'"F:\MYPROGRAMS\Microsoft VS Code\Code.exe"')
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
-            elif task == "вимкнись":
+                ans = "standart"
+            #elif "відкрий vs code" in task or "открой vscode" in task:
+            #    os.startfile(r'"F:\MYPROGRAMS\Microsoft VS Code\Code.exe"')
+            #    ans = "standart"
+            elif task == "відключись":
                 run = False
                 ans = gTTS(text=f"допобачення {your_name}", lang=language, slow=False)
             elif "відкрий telegram" in task:
-                os.startfile(r'"C:\Users\matvii\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Telegram Desktop\Telegram.lnk"')
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
+                if telegram_online == "True\n":
+                    webbrowser.open_new_tab(f"https://web.telegram.org/k/")
+                    ans = "standart"
+                else:
+                    os.startfile(telegram_path)
+                    ans = "standart"
             elif "музику" in task:
-                webbrowser.open_new_tab("https://soundcloud.com/matvij-kalinin/sets/playlist")
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
+                webbrowser.open_new_tab(music_link)
+                ans = "standart"
             elif "вимкни пк" in task:
-                os.system("shutdown /s /t 15")
+                os.system("shutdown /s /t 5")
                 ans = gTTS(text=f"вимикаю {your_name}", lang=language, slow=False)
             elif "дата" in task:
                 current_datetime = datetime.now()
@@ -137,49 +134,50 @@ def make_something():
                     text=f"{your_name}, сьогодні {dayOfWeek}, {current_datetime.day} , {current_datetime.month}, {current_datetime.year}",
                     lang=language, slow=False)
             elif "microsoft office" in task:
-                webbrowser.open_new_tab("https://www.office.com/?auth=1")
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
-            elif "вимкни світло" in task:
+                webbrowser.open_new_tab("https://www.office.com/")
+                ans = "standart"
+            elif "gemini" in task:
+                webbrowser.open_new_tab("https://gemini.google.com/?hl=uk")
+                ans = "standart"
+            elif "chat gpt" in task or "chatgpt" in task or "чат гпт" in task or "чат gpt" in task:
+                webbrowser.open_new_tab("https://chatgpt.com")
+                ans = "standart"
+            elif ("вимкни світло" in task) and use_light_system == "True\n":
                 pins[10].write(0)
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
-            elif "увімкни світло" in task:
+                ans = "standart"
+            elif "увімкни світло" in task and use_light_system == "True\n":
                 pins[10].write(0)
                 time.sleep(0.5)
                 pins[10].write(1)
-                ans = gTTS(text=standart_answer, lang=language, slow=False)
+                ans = "standart"
             elif "котра година" in task:
                 current_datetime = datetime.now()
+                hour = current_datetime.hour
+                minute = current_datetime.minute
+                second = current_datetime.second
+                if int(hour) < 10:
+                    hour = f"0{hour}"
+                if int(minute) < 10:
+                    minute = f"0{minute}"
+                if int(second) < 10:
+                    second = f"0{second}" 
+
                 ans = gTTS(
-                    text=f"{your_name}, зараз {current_datetime.hour}, {current_datetime.minute}, {current_datetime.second}",
+                    text=f"{your_name}, зараз {hour}, {minute}, {second}",
                     lang=language, slow=False)
-            elif "питання" in task:
-                promt = (f"Ти голосовий помічник AVRORA що розшифровується як Artificial Virtual Robot Optimized for "
-                         f"Reliable Assistance,"
-                         f"остані запити: {last_promts}, останні відповіді: {last_answers}, використовуй історію "
-                         f"відповідей і запитів щоб відповісти на наступний запит якщо це потрібно також "
-                         f"обов'язково відповідай коротко і формально і українською і не потрібно додавати "
-                         f"форматування до"
-                         f"тексту уяви, що пишеш у звичайному блокноті і звертайся до мене {your_name}, ось питання: "
-                         f"{task}")
-                if len(last_promts) < count_of_remembered_promts:
-                    last_promts.append(task)
-                else:
-                    last_promts.pop(0)
-                    last_promts.append(task)
-                if len(last_answers) < count_of_remembered_promts:
-                    last_answers.append(ask_gpt(task))
-                else:
-                    last_answers.pop(0)
-                    last_answers.append(ask_gpt(task))
-                ans = gTTS(text=ask_gpt(promt), lang=language, slow=False)
-                answers = open("answers.txt", "w+")
-                answers.write(task)
-                if show_promts == "1":
-                    print(f"Текущий промт: {promt}")
             else:
                 ans = gTTS(text="Не розумію", lang=language, slow=False)
-            ans.save("sound.mp3")
-            data, fs = sf.read("sound.mp3", dtype='float32')
+            if ans == "standart":
+                r = random.randint(0, 3)
+                if r == 0:
+                    data, fs = sf.read("s1.mp3", dtype='float32')
+                elif r == 1:
+                    data, fs = sf.read("s2.mp3", dtype='float32')
+                else:
+                    data, fs = sf.read("s3.mp3", dtype='float32')
+            else:
+                ans.save("sound.mp3")
+                data, fs = sf.read("sound.mp3", dtype='float32')
             sd.play(data, fs)
             status = sd.wait()
         else:
