@@ -1,5 +1,6 @@
-your_name = sir
-music_link = https://www.spotify.com/ua-uk/free/
-use_light_system = False
+your_name = hronos
+music_link = https://soundcloud.com/matvij-kalinin/sets/playlist
+use_light_system = True
 telegram_online = False
-telegram_path = 
+language = en
+telegram_path = C:\Users\matvii\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Telegram Desktop\Telegram.lnk

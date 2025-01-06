@@ -12,14 +12,14 @@ import time
 
 pins = list()
 PORT = pyfirmata2.Arduino.AUTODETECT
-language = 'uk'
+language = "uk"
 your_name = "sir"
 use_light_system = ""
 music_link = "https://www.spotify.com/ua-uk/free/"
 telegram_path = ""
 telegram_online = ""
 
-with open(".\\settings.txt") as open_file:
+with open("settings.txt") as open_file:
     for line in open_file:
         if line[:12] == "your_name = ":
             your_name = line[12:]
@@ -33,13 +33,19 @@ with open(".\\settings.txt") as open_file:
             telegram_path = line[16:]
         elif line[:18] == "telegram_online = ":
             telegram_online = line[18:]
+        elif line[:11] == "language = ":
+            language = line[11:].replace("\n", "")
+
 if use_light_system == "True\n":
     board = pyfirmata2.Arduino(PORT)
     try:
         try:
             file = open("setupPins.txt")
         except:
-            print("Не знаєденно файлу з налаштуванням пінів")
+            if language == "uk":
+                print("Не знайдено файлу з налаштуванням пінів")
+            elif language == "en":
+                print("No pin configuration file found")
 
         for line in file:
             line = line.split(",")
@@ -49,14 +55,20 @@ if use_light_system == "True\n":
         pass
 print(f"                        AVRORA                            \n"
       f"Artificial Virtual Robot Optimized for Reliable Assistance")
-
-StandartAns1 = gTTS(text=f"звісно {your_name}", lang=language, slow=False).save("s1.mp3")
-StandartAns1 = gTTS(text=f"секунду {your_name}", lang=language, slow=False).save("s2.mp3")
-StandartAns1 = gTTS(text=f"зараз {your_name}", lang=language, slow=False).save("s3.mp3")
-
-print(
-    f"\nПоточні налаштування:\n\nДо вас звертатися: {your_name}\nПосилання на музику: {music_link}\nШлях до телеграму: {telegram_path}\n\nВикористовувати телеграм в браузері: {telegram_online}\n\nВикористовувати систему світла: {use_light_system}\n")
-ans = gTTS(text=f"Вітаю, {your_name}, всі системи активні", lang=language, slow=False)
+if language == "uk":
+    StandartAns1 = gTTS(text=f"звісно {your_name}", lang=language, slow=False).save("s1.mp3")
+    StandartAns1 = gTTS(text=f"секунду {your_name}", lang=language, slow=False).save("s2.mp3")
+    StandartAns1 = gTTS(text=f"зараз {your_name}", lang=language, slow=False).save("s3.mp3")
+    print(f"\nПоточні налаштування:\n\nДо вас звертатися: {your_name}\nПосилання на музику: {music_link}\nШлях до Телеграму: {telegram_path}\n\nВикористовувати Телеграм в браузері: {telegram_online}\n\nВикористовувати систему світла: {use_light_system}\n")
+elif language == "en":
+    StandartAns1 = gTTS(text=f"Of course {your_name}", lang=language, slow=False).save("s1.mp3")
+    StandartAns1 = gTTS(text=f"give me a second {your_name}", lang=language, slow=False).save("s2.mp3")
+    StandartAns1 = gTTS(text=f"please wait {your_name}", lang=language, slow=False).save("s3.mp3")
+    print(f"\nCurrent settings:\n\nTo contact you: {your_name}\nLink to music: {music_link}\nPath to Telegram: {telegram_path}\n\nUse Telegram in the browser: {telegram_online}\n\nUse the light system: {use_light_system}\n")
+if language == "uk":
+    ans = gTTS(text=f"Вітаю, {your_name}, всі системи активні", lang=language, slow=False)
+elif language == "en":
+    ans = gTTS(text=f"Hello, {your_name}, all systems are active", lang=language, slow=False)
 ans.save("welcome.mp3")
 data, fs = sf.read("welcome.mp3", dtype='float32')
 sd.play(data, fs)
@@ -66,13 +78,19 @@ def command():
     r = sr.Recognizer()
 
     with sr.Microphone() as source:
-        print("Говоріть")
+        if language == "uk":
+            print("Говоріть")
+        elif language == "en":
+            print("Talk")
         r.pause_threshold = 1
         r.adjust_for_ambient_noise(source, duration=1)
         audio = r.listen(source)
 
     try:
-        task = r.recognize_google(audio, language="uk-in").lower()
+        if language == "uk":
+            task = r.recognize_google(audio, language="uk-in").lower()
+        elif language == "en":
+            task = r.recognize_google(audio, language="en-in").lower()
     except:
         task = command()
     return task
@@ -84,55 +102,87 @@ def make_something():
     run = True
     if "аврора" in task[:6] or "aurora" in task[:6]:
         print(task)
-        task = task[6:]
+        task = task[7:]
         if task != "" and task != " ":
-            if "знайди" in task:
-                task = task[6:]
+            if "знайди" in task or "search" in task:
+                task = task[7:]
                 task.replace(" ", "+")
                 webbrowser.open_new_tab(f"https://www.google.com/search?q={task}")
                 ans = "standart"
-            elif "відкрий youtube" in task:
+            elif "відкрий youtube" in task or "open youtube" in task:
                 webbrowser.open_new_tab("https://www.youtube.com/")
                 ans = "standart"
             #elif "відкрий vs code" in task or "открой vscode" in task:
             #    os.startfile(r'"F:\MYPROGRAMS\Microsoft VS Code\Code.exe"')
             #    ans = "standart"
-            elif task == "відключись":
+            elif task == "до побачення" or "goodbye" in task:
                 run = False
-                ans = gTTS(text=f"допобачення {your_name}", lang=language, slow=False)
-            elif "відкрий telegram" in task:
+                if language == "uk":
+                    ans = gTTS(text=f"до побачення {your_name}", lang=language, slow=False)
+                elif language == "en":
+                    ans = gTTS(text=f"goodbye {your_name}", lang=language, slow=False)
+            elif "відкрий telegram" in task or "open telegram" in task:
                 if telegram_online == "True\n":
                     webbrowser.open_new_tab(f"https://web.telegram.org/k/")
                     ans = "standart"
                 else:
                     os.startfile(telegram_path)
                     ans = "standart"
-            elif "музику" in task:
+            elif "музику" in task or "play music" in task:
                 webbrowser.open_new_tab(music_link)
                 ans = "standart"
-            elif "вимкни пк" in task:
+            elif "вимкни пк" in task or "shut down pc" in task:
                 os.system("shutdown /s /t 5")
-                ans = gTTS(text=f"вимикаю {your_name}", lang=language, slow=False)
-            elif "дата" in task:
+                if language == "uk":
+                    ans = gTTS(text=f"вимикаю {your_name}", lang=language, slow=False)
+                elif language == "en":
+                    ans = gTTS(text=f"turning it off {your_name}", lang=language, slow=False)
+            elif "дата" in task or "what's the date" in task:
                 current_datetime = datetime.now()
                 dayOfWeek = current_datetime.weekday()
                 if dayOfWeek == 0:
-                    dayOfWeek = "понеділок"
+                    if language == "uk":
+                        dayOfWeek = "понеділок"
+                    elif language == "en":
+                        dayOfWeek = "monday"
                 elif dayOfWeek == 1:
-                    dayOfWeek = "вівторок"
+                    if language == "uk":
+                        dayOfWeek = "вівторок"
+                    elif language == "en":
+                        dayOfWeek = "tuesday"
                 elif dayOfWeek == 2:
-                    dayOfWeek = "середа"
+                    if language == "uk":
+                        dayOfWeek = "середа"
+                    elif language == "en":
+                        dayOfWeek = "wednesday"
                 elif dayOfWeek == 3:
-                    dayOfWeek = "четвер"
+                    if language == "uk":
+                        dayOfWeek = "четвер"
+                    elif language == "en":
+                        dayOfWeek = "thursday"
                 elif dayOfWeek == 4:
-                    dayOfWeek = "п'ятниця"
+                    if language == "uk":
+                        dayOfWeek = "п'ятниця"
+                    elif language == "en":
+                        dayOfWeek = "friday"
                 elif dayOfWeek == 5:
-                    dayOfWeek = "субота"
+                    if language == "uk":
+                        dayOfWeek = "субота"
+                    elif language == "en":
+                        dayOfWeek = "saturday"
                 elif dayOfWeek == 6:
-                    dayOfWeek = "неділя"
-                ans = gTTS(
-                    text=f"{your_name}, сьогодні {dayOfWeek}, {current_datetime.day} , {current_datetime.month}, {current_datetime.year}",
-                    lang=language, slow=False)
+                    if language == "uk":
+                        dayOfWeek = "неділя"
+                    elif language == "en":
+                        dayOfWeek = "sunday"
+                if language == "uk":
+                    ans = gTTS(
+                        text=f"{your_name}, сьогодні {dayOfWeek}, {current_datetime.day} , {current_datetime.month}, {current_datetime.year}",
+                        lang=language, slow=False)
+                elif language == "en":
+                    ans = gTTS(
+                        text=f"{your_name}, today is {dayOfWeek}, {current_datetime.day} , {current_datetime.month}, {current_datetime.year}",
+                        lang=language, slow=False)
             elif "microsoft office" in task:
                 webbrowser.open_new_tab("https://www.office.com/")
                 ans = "standart"
@@ -142,15 +192,15 @@ def make_something():
             elif "chat gpt" in task or "chatgpt" in task or "чат гпт" in task or "чат gpt" in task:
                 webbrowser.open_new_tab("https://chatgpt.com")
                 ans = "standart"
-            elif ("вимкни світло" in task) and use_light_system == "True\n":
+            elif ("вимкни світло" in task or "turn off lights" in task) and use_light_system == "True\n":
                 pins[10].write(0)
                 ans = "standart"
-            elif "увімкни світло" in task and use_light_system == "True\n":
+            elif ("увімкни світло" in task or "turn on lights" in task) and use_light_system == "True\n":
                 pins[10].write(0)
                 time.sleep(0.5)
                 pins[10].write(1)
                 ans = "standart"
-            elif "котра година" in task:
+            elif "котра година" in task or "what time is it" in task:
                 current_datetime = datetime.now()
                 hour = current_datetime.hour
                 minute = current_datetime.minute
@@ -161,12 +211,20 @@ def make_something():
                     minute = f"0{minute}"
                 if int(second) < 10:
                     second = f"0{second}" 
-
-                ans = gTTS(
+                
+                if language == "uk":
+                    ans = gTTS(
                     text=f"{your_name}, зараз {hour}, {minute}, {second}",
                     lang=language, slow=False)
+                elif language == "en":
+                    ans = gTTS(
+                    text=f"{your_name}, now {hour}, {minute}, {second}",
+                    lang=language, slow=False)
             else:
-                ans = gTTS(text="Не розумію", lang=language, slow=False)
+                if language == "uk":
+                    ans = gTTS(text="Не розумію", lang=language, slow=False)
+                elif language == "en":
+                    ans = gTTS(text="I dont understand", lang=language, slow=False)
             if ans == "standart":
                 r = random.randint(0, 3)
                 if r == 0:
@@ -182,15 +240,6 @@ def make_something():
             status = sd.wait()
         else:
             pass
-
-
-def ask_gpt(promt: str) -> str:
-    response = g4f.ChatCompletion.create(
-        model=g4f.models.gpt_35_turbo,
-        messages=[{"role": "user", "content": promt}],
-    )
-    return response
-
 
 make_something()
 while run:
