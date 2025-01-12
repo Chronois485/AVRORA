@@ -1,6 +1,6 @@
 your_name = hronos
 music_link = https://soundcloud.com/matvij-kalinin/sets/playlist
-use_light_system = True
+use_light_system = False
 telegram_online = False
-language = en
+language = uk
 telegram_path = C:\Users\matvii\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Telegram Desktop\Telegram.lnk

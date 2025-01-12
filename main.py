@@ -1,5 +1,5 @@
 from gtts import gTTS
-import g4f
+import pyautogui
 import speech_recognition as sr
 import webbrowser
 import sounddevice as sd
@@ -8,9 +8,14 @@ import os
 import random
 import pyfirmata2
 from datetime import datetime
+from utilFuncs import *
+import pyscreeze
+import cv2
+import time
 import time
 
 pins = list()
+screenWidth, screenHeight = pyautogui.size()
 PORT = pyfirmata2.Arduino.AUTODETECT
 language = "uk"
 your_name = "sir"
@@ -37,8 +42,8 @@ with open("settings.txt") as open_file:
             language = line[11:].replace("\n", "")
 
 if use_light_system == "True\n":
-    board = pyfirmata2.Arduino(PORT)
     try:
+        board = pyfirmata2.Arduino(PORT)
         try:
             file = open("setupPins.txt")
         except:
@@ -52,7 +57,10 @@ if use_light_system == "True\n":
             pins.append(board.get_pin(line[0]))
         file.close()
     except:
-        pass
+        if language == "uk":
+            print("Неможливо підключитися до плати")
+        elif language == "en":
+            print("Unable to connect to the board")
 print(f"                        AVRORA                            \n"
       f"Artificial Virtual Robot Optimized for Reliable Assistance")
 if language == "uk":
@@ -95,7 +103,6 @@ def command():
         task = command()
     return task
 
-
 def make_something():
     task = command()
     global run
@@ -112,9 +119,55 @@ def make_something():
             elif "відкрий youtube" in task or "open youtube" in task:
                 webbrowser.open_new_tab("https://www.youtube.com/")
                 ans = "standart"
-            #elif "відкрий vs code" in task or "открой vscode" in task:
-            #    os.startfile(r'"F:\MYPROGRAMS\Microsoft VS Code\Code.exe"')
-            #    ans = "standart"
+            elif "пауза" in task or "pause" in task:
+                pyautogui.click(round(screenWidth/2), round(screenHeight/2))
+                ans = "standart"
+            elif "натисни" in task or "click" in task:
+                pyautogui.click(pyautogui.position())
+                ans = "standart"
+            elif "наступне" in task or "next" in task:
+                pyautogui.hotkey('shift', 'n')
+            elif "звук на " in task or "volume at " in task:
+                if language == "uk":
+                    task = task[8:]
+                elif language == "en":
+                    task = task[10:]
+                set_volume(int(task))
+                ans = "standart"
+            elif "курсор на " in task or "cursor at " in task:
+                if language == "uk":
+                    task = task[10:]
+                elif language == "en":
+                    task = task[10:]
+                x, y = task.split(" ")
+                if x > screenWidth:
+                    x = screenWidth
+                elif x < 0:
+                    x = 0
+                if y > screenHeight:
+                    y = screenHeight
+                elif y < 0:
+                    y = 0
+                pyautogui.moveTo(x, y)
+                ans = "standart"
+            elif "напиши повідомлення" in task or "text" in task:
+                if language == "uk":
+                    task = task[20:]
+                elif language == "en":
+                    task = task[5:]
+                if telegram_online == "True\n":
+                    webbrowser.open_new_tab(f"https://web.telegram.org/k/")
+                    ans = "standart"
+                else:
+                    os.startfile(telegram_path)
+                
+                time.sleep(0.5)
+                pyautogui.click("images\\textSpace.png")
+                text = convert_to_english(task)
+                print(text)
+                pyautogui.write(text, 0.02)
+                pyautogui.press("enter")
+                ans = "standart"
             elif task == "до побачення" or "goodbye" in task:
                 run = False
                 if language == "uk":
@@ -243,4 +296,7 @@ def make_something():
 
 make_something()
 while run:
-    make_something()
+    try:
+        make_something()
+    except Exception as e:
+        print(e)
