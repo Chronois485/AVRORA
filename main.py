@@ -140,6 +140,8 @@ def make_something():
                 elif language == "en":
                     task = task[10:]
                 x, y = task.split(" ")
+                x = int(x)
+                y = int(y)
                 if x > screenWidth:
                     x = screenWidth
                 elif x < 0:
@@ -157,7 +159,6 @@ def make_something():
                     task = task[5:]
                 if telegram_online == "True\n":
                     webbrowser.open_new_tab(f"https://web.telegram.org/k/")
-                    ans = "standart"
                 else:
                     os.startfile(telegram_path)
                 
